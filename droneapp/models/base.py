@@ -1,4 +1,7 @@
 class Singleton(type):
+    """
+    シングルトンデザインパターン
+    """
 
     _instance = {}
 

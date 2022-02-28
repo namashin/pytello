@@ -45,10 +45,8 @@ class ErrorNoImageDir(Exception):
 class DroneManager(metaclass=Singleton):
     """参考にしたもの　
 
-
     url: https://dl-cdn.ryzerobotics.com/downloads/Tello/Tello%20SDK%202.0%20User%20Guide.pdf
     github : https://github.com/dji-sdk/Tello-Python
-
 
     """
 
@@ -119,6 +117,11 @@ class DroneManager(metaclass=Singleton):
         self.set_speed(self.speed)
 
     def receive_response_from_drone(self, stop_event):
+        """
+
+        __init__内でスレッドとして、スタートさせてる。
+
+        """
         while not stop_event.is_set():
             try:
                 self.response, ip = self.socket.recvfrom(3000)
@@ -127,12 +130,14 @@ class DroneManager(metaclass=Singleton):
                 logger.error({'action': 'receive_response', 'ex': ex})
                 break
 
-    def __del__(self):
-        self.stop()
+    # def __del__(self):
+    #     """このDroneManagerクラスのインスタンスが破壊される時にself.stop()呼び出す"""
+    #     self.stop()
 
     def stop(self):
         self.stop_event.set()
 
+        """ストップイベントをセットしても、スレッドがすぐ死ぬわけではない"""
         retry = 0
         while self._response_thread_from_drone.is_alive():
             time.sleep(0.3)
@@ -289,6 +294,15 @@ class DroneManager(metaclass=Singleton):
             self.is_patrol = False
 
     def receive_video(self, stop_event, pipe_in, host_ip, video_port):
+        """
+        __init__内でクラス初期化時にスレッドとしてスタートさせてる。
+
+        :param stop_event:
+        :param pipe_in:
+        :param host_ip:
+        :param video_port:
+        :return:
+        """
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock_video:
             sock_video.settimeout(.5)
             sock_video.bind((host_ip, video_port))
@@ -322,7 +336,7 @@ class DroneManager(metaclass=Singleton):
             if not frame:
                 continue
 
-            frame = np.fromstring(frame, np.uint8).reshape(FRAME_Y, FRAME_X, 3)
+            frame = np.fromstring(str(frame), np.uint8).reshape(FRAME_Y, FRAME_X)
             yield frame
 
     def enable_face_detect(self):
@@ -363,8 +377,8 @@ class DroneManager(metaclass=Singleton):
                         drone_x = -30
                     if percent_face < 0.02:
                         drone_x = 30
-                    self.send_command(f'go {drone_x} {drone_y} {drone_z} {speed}',
-                                      blocking=False)
+                    self.send_command(f'go {drone_x} {drone_y} {drone_z} {speed}', blocking=False)
+
                     break
 
             _, jpeg = cv.imencode('.jpg', frame)

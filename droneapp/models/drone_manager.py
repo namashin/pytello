@@ -240,6 +240,10 @@ class DroneManager(metaclass=Singleton):
         return self.move('back', distance)
 
     def patrol(self):
+        """
+        既にパトロール中でなければ、
+        :return:
+        """
         if not self.is_patrol:
             self._thread_patrol = threading.Thread(
                 target=self._patrol,
@@ -258,10 +262,11 @@ class DroneManager(metaclass=Singleton):
             with contextlib.ExitStack as stack:
                 stack.callback(patrol_semaphore.release)
 
-                """statusの数字によってドローンの動きを変えていく"""
-                change_status = 0
+                """change_statusの数字によってドローンの動きを変えていく"""
+                self.up()
                 while not patrol_event.is_set():
-                    change_status += 1
+                    import random
+                    change_status = random.randint(0, 6)
                     if change_status == 1:
                         self.up()
                     if change_status == 2:
@@ -273,7 +278,7 @@ class DroneManager(metaclass=Singleton):
                     if change_status == 5:
                         self.up()
                     if change_status == 6:
-                        change_status = 0
+                        self.flip_right()
 
                     time.sleep(10)
 
@@ -297,10 +302,10 @@ class DroneManager(metaclass=Singleton):
         """
         __init__内でクラス初期化時にスレッドとしてスタートさせてる。
 
-        :param stop_event:
-        :param pipe_in:
-        :param host_ip:
-        :param video_port:
+        :param stop_event: threading.Event()
+        :param pipe_in: self.proc_stdin
+        :param host_ip: self.host_ip ('192.168.10.2')
+        :param video_port: self.video_port (11111)
         :return:
         """
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock_video:
@@ -355,7 +360,7 @@ class DroneManager(metaclass=Singleton):
                 faces = self.face_cascade.detectMultiScale(gray, 1.3, 6)
 
                 for (x, y, width, height) in faces:
-                    cv.rectangle(frame, (x,y), (x+width, y+height), (255, 0, 0), 2)
+                    cv.rectangle(frame, (x, y), (x+width, y+height), (255, 0, 0), 2)
 
                     face_center_x = x + (width / 2)
                     face_center_y = y + (height / 2)

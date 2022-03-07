@@ -125,7 +125,7 @@ class DroneManager(metaclass=Singleton):
         while not stop_event.is_set():
             try:
                 self.response, ip = self.socket.recvfrom(3000)
-                logger.info({'action': 'receive_response', 'response': self.response})
+                logger.info({'action': 'receive_response', 'response': self.response, 'ip': ip})
             except socket.error as ex:
                 logger.error({'action': 'receive_response', 'ex': ex})
                 break
@@ -241,8 +241,8 @@ class DroneManager(metaclass=Singleton):
 
     def patrol(self):
         """
-        既にパトロール中でなければ、
-        :return:
+        パトロールしていなかったら、パトロールさせる。
+        既にパトロール中だとログ出力のみ。
         """
         if not self.is_patrol:
             self._thread_patrol = threading.Thread(
@@ -300,13 +300,14 @@ class DroneManager(metaclass=Singleton):
 
     def receive_video(self, stop_event, pipe_in, host_ip, video_port):
         """
+        
         __init__内でクラス初期化時にスレッドとしてスタートさせてる。
 
         :param stop_event: threading.Event()
         :param pipe_in: self.proc_stdin
-        :param host_ip: self.host_ip ('192.168.10.2')
-        :param video_port: self.video_port (11111)
-        :return:
+        :param host_ip: self.host_ip ('192.168.10.2'　　デフォルト設定)
+        :param video_port: self.video_port (11111　　　デフォルト設定)
+        
         """
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock_video:
             sock_video.settimeout(.5)

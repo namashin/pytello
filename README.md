@@ -9,7 +9,7 @@ You can check the Tello EDU command by seeing attached PDF document<br>
 
 ## NOTICE
 
-Before you run main.py, you should connect Tello EDU to Wifi<br>
+Before you run main.py, you should connect Tello EDU Wifi and your PC<br>
 or you will get error.
 <br>
 <br>

@@ -47,8 +47,8 @@ class ErrorNoImageDir(Exception):
 class DroneManager(metaclass=Singleton):
     """参考にしたもの　
 
-    url: https://dl-cdn.ryzerobotics.com/downloads/Tello/Tello%20SDK%202.0%20User%20Guide.pdf
-    github : https://github.com/dji-sdk/Tello-Python
+    url:      https://dl-cdn.ryzerobotics.com/downloads/Tello/Tello%20SDK%202.0%20User%20Guide.pdf
+    github :  https://github.com/dji-sdk/Tello-Python
 
     """
 

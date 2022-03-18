@@ -81,12 +81,13 @@ class DroneManager(metaclass=Singleton):
         self.is_patrol = False
         self._patrol_semaphore = threading.Semaphore(1)
         self._thread_patrol = None
-
-        self.proc = subprocess.Popen(
-            CMD_FFMPEG.split(' '),
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE
-        )
+        
+        self.proc = subprocess.run(                                   #self.proc = subprocess.Popen(  
+          args=CMD_FFMPEG.split(' '),                                 #               CMD_FFMPEG.split(' '),           
+          stdin=subprocess.PIPE,                                      #               stdin=subprocess.PIPE,
+          stdout=subprocess.PIPE                                      #               stdin=subprocess.PIPE,
+        )                                                             #             )
+                                                                           
         self.proc_stdin = self.proc.stdin
         self.proc_stdout = self.proc.stdout
 

@@ -34,10 +34,12 @@ FACE_DETECT_XML_FILE = './droneapp/models/haarcascade_frontalface_default.xml'
 SNAPSHOT_IMAGE_FOLDER = './droneapp/static/img/snapshots/'
 
 
+# xmlファイル無い時用の個別エラー
 class ErrorNoFaceDetectXMLFile(Exception):
     """Error: There is no face detect xml file"""
 
-
+    
+# イメージフォルダ作成されてない時用
 class ErrorNoImageDir(Exception):
     """Error: There is no image dir"""
 
@@ -110,7 +112,7 @@ class DroneManager(metaclass=Singleton):
         self._command_semaphore = threading.Semaphore(1)
         self._command_thread = None
 
-        # ドローン飛ばす前にまずこのコマンドを送信しないといけない
+        # ドローン飛ばす前にまずこのコマンドを送信しないといけない（添付pdf参照して）
         self.send_command('command')
         self.send_command('streamon')
 
@@ -118,9 +120,7 @@ class DroneManager(metaclass=Singleton):
 
     def receive_response_from_drone(self, stop_event):
         """
-
         __init__内でスレッドとして、スタートさせてる。
-
         """
         while not stop_event.is_set():
             try:
@@ -138,12 +138,8 @@ class DroneManager(metaclass=Singleton):
         self.stop_event.set()
 
         """ストップイベントをセットしても、スレッドがすぐ死ぬわけではない"""
-        retry = 0
-        while self._response_thread_from_drone.is_alive():
-            time.sleep(0.3)
-            if retry > 100:
-                break
-            retry += 1
+        if self._response_thread_from_drone.is_alive():
+            time.sleep(1)
 
         self.socket.close()
 
@@ -164,13 +160,9 @@ class DroneManager(metaclass=Singleton):
                 stack.callback(self._command_semaphore.release)
                 logger.info({'action': '_send_command', 'command': command})
                 self.socket.sendto(command.encode('utf-8'), self.drone_address)
-
-                retry = 0
-                while self.response is None:
-                    time.sleep(0.3)
-                    if retry > 3:
-                        break
-                    retry += 1
+                
+                if self.response is None:
+                    time.sleep(0.7)
 
                 if self.response is None:
                     response = None
@@ -212,12 +204,9 @@ class DroneManager(metaclass=Singleton):
 
     def move(self, move_direction, distance):
         """
-
         このmoveメソッドをベースに
         下記、up, down, left, right, forward, backメソッドを実装
-
         """
-
         distance = int(round(distance * 100))
         return self.send_command(f'{move_direction} {distance}')
 
@@ -263,6 +252,7 @@ class DroneManager(metaclass=Singleton):
                 stack.callback(patrol_semaphore.release)
 
                 """change_statusの数字によってドローンの動きを変えていく"""
+                
                 self.up()
                 while not patrol_event.is_set():
                     import random
@@ -289,12 +279,8 @@ class DroneManager(metaclass=Singleton):
         if self.is_patrol:
             self.patrol_event.set()
 
-            retry = 0
-            while self._thread_patrol.is_Alive():
-                time.sleep(0.3)
-                if retry > 100:
-                    break
-                retry += 1
+            if self._thread_patrol.is_Alive():
+                time.sleep(1)
 
             self.is_patrol = False
 
@@ -303,10 +289,10 @@ class DroneManager(metaclass=Singleton):
         
         __init__内でクラス初期化時にスレッドとしてスタートさせてる。
 
-        :param stop_event: threading.Event()
-        :param pipe_in: self.proc_stdin
-        :param host_ip: self.host_ip ('192.168.10.2'　　デフォルト設定)
-        :param video_port: self.video_port (11111　　　デフォルト設定)
+        :param stop_event:   threading.Event()
+        :param pipe_in:      self.proc_stdin
+        :param host_ip:      self.host_ip       ('192.168.10.2')
+        :param video_port:   self.video_port    (11111)
         
         """
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock_video:

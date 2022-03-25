@@ -66,6 +66,7 @@ class DroneManager(metaclass=Singleton):
 
         # socket初期化処理 # UDP
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        # /*----- Bind Socket to Address -----*/
         self.socket.bind((self.host_ip, self.host_port))
 
         self.response = None

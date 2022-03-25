@@ -64,7 +64,7 @@ class DroneManager(metaclass=Singleton):
         # ドローンのスピード調整
         self.speed = speed
 
-        # socket初期化処理
+        # socket初期化処理 # UDP
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind((self.host_ip, self.host_port))
 
@@ -296,6 +296,8 @@ class DroneManager(metaclass=Singleton):
         :param video_port:   self.video_port    (11111)
         
         """
+        
+        # UDP 使用
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock_video:
             sock_video.settimeout(.5)
             sock_video.bind((host_ip, video_port))

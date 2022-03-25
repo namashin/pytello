@@ -301,6 +301,7 @@ class DroneManager(metaclass=Singleton):
         # UDP 使用
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock_video:
             sock_video.settimeout(.5)
+            # /*----- Bind Socket to Address -----*/
             sock_video.bind((host_ip, video_port))
             data = bytearray(2048)
 
